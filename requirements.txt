@@ -1,0 +1,7 @@
+flask
+transformers
+pymongo
+gTTs
+pdfminer.six
+gunicorn
+psycopg2-binary
