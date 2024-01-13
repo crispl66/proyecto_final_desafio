@@ -1,5 +1,5 @@
 from flask import Flask, jsonify, render_template, request
-from transformers import pipeline
+#from transformers import pipeline
 from gtts import gTTS
 import requests
 import os 
@@ -22,37 +22,37 @@ audios_collection = db['audios']
 # headers = {"Authorization": f"Bearer {API_TOKEN}"}
 
 @app.route('/', methods=['GET'])
-    def plantilla():
-        return render_template ('endpoints.html')
+def plantilla():
+    return render_template ('endpoints.html')
 
 @app.route('/subir_pdf', methods=['POST'])
-    def subir_pdf():
-        file = request.files['file']
-        return file
+def subir_pdf():
+    file = request.files['file']
+    return file
 
 @app.route('/resumen', methods=['GET'])
-    def resumen(file):
-        text = extract_text (file)
-        API_TOKEN = "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"
+def resumen(file):
+    text = extract_text (file)
+    API_TOKEN = "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"
 
-        API_URL = "https://api-inference.huggingface.co/models/facebook/bart-large-cnn"
-        headers = {"Authorization": f"Bearer {API_TOKEN}"}
+    API_URL = "https://api-inference.huggingface.co/models/facebook/bart-large-cnn"
+    headers = {"Authorization": f"Bearer {API_TOKEN}"}
 
-        def query(payload):
-	        response = requests.post(API_URL, headers=headers, json=payload)
-	        return response.json()
+    def query(payload):
+        response = requests.post(API_URL, headers=headers, json=payload)
+        return response.json()
 
-        resumen = query({"inputs":text})
-        contenido_resumen = resumen[0][next(iter(resumen[0]))]
-        resumen_collection.insert_one({'resumen': contenido_resumen})
-        return jsonify(contenido_resumen)
+    resumen = query({"inputs":text})
+    contenido_resumen = resumen[0][next(iter(resumen[0]))]
+    resumen_collection.insert_one({'resumen': contenido_resumen})
+    return jsonify(contenido_resumen)
 
 @app.route('/audio', methods=['GET'])
-    def audio(contenido_resumen)
-        tts = gTTS(text=contenido_resumen, lang='es')
-        audio = tts.save("audio.mp3")
-        audios_collection.insert_one({'audio': audio})
-        return audio
+def audio(contenido_resumen)
+    tts = gTTS(text=contenido_resumen, lang='es')
+    audio = tts.save("audio.mp3")
+    audios_collection.insert_one({'audio': audio})
+    return audio
 
 if __name__ == '__main__':
     app.run(debug=True,port=8080)
