@@ -48,7 +48,7 @@ def resumen(file):
     return jsonify(contenido_resumen)
 
 @app.route('/audio', methods=['GET'])
-def audio(contenido_resumen)
+def audio(contenido_resumen):
     tts = gTTS(text=contenido_resumen, lang='es')
     audio = tts.save("audio.mp3")
     audios_collection.insert_one({'audio': audio})
