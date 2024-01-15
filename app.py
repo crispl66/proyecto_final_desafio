@@ -1,11 +1,11 @@
-from flask import Flask, jsonify, render_template, request
+from flask import Flask, jsonify, render_template, request, send_file
 from gtts import gTTS
 import requests
 import os 
 from pymongo import MongoClient 
 from pdfminer.high_level import extract_text 
 from gridfs import GridFS
-from bson import send_file, ObjectId
+from bson import ObjectId
 
 app = Flask(__name__)
 
@@ -81,7 +81,7 @@ def get_pdf(pdf_id):
 def get_audio(audio_id):
     fs_audio = GridFS(db, collection='audios')
     audio_file = fs_audio.get(ObjectId(audio_id))
-    return send_file(audio_file, as_attachment=True)
+    return send_file(audio_file, mimetype='audio/mpeg', as_attachment=True)
 
 
 
