@@ -26,7 +26,7 @@ def index():
     'status': True,
     'code': 200,
     'message': 'Its Working!'}), mimetype='application/json')
-@app.route('/pass', methods=['POST'])
+@app.route('/pass', methods=['GET'])
 def post():
     try:
         pdf_file = request.files['file']
