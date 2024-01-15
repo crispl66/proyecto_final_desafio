@@ -1,6 +1,6 @@
 import os
 import shutil
-import cv2
+#import cv2
 import json
 import pandas as pd
 import logging
