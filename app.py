@@ -42,3 +42,6 @@ def post():
         return final_data.to_json(orient="records")
     except Exception as e:
         app.logger.info('error occurred')
+
+if __name__ == '__main__':
+    app.run(debug=True,port=8000)
