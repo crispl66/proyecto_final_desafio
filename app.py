@@ -4,6 +4,7 @@ import requests
 import os 
 from pymongo import MongoClient 
 from pdfminer.high_level import extract_text 
+from gridfs import GridFS
 
 app = Flask(__name__)
 
@@ -61,7 +62,7 @@ def subir_pdf():
         # Save the binary content to GridFS
         file_id = fs_pdf.put(pdf_file, filename='acta.pdf', metadata={'folder': 'pdfs'})
     #audios_collection.insert_one({'audio': audio_binario})
-    
+
     return
 
 @app.route('/resumen', methods=['GET','POST'])
