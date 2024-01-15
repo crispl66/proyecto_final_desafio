@@ -2,7 +2,7 @@ import os
 import shutil
 #import cv2
 import json
-#import pandas as pd
+import pandas as pd
 import logging
 from flask import Flask, jsonify, request, flash, redirect, Response
 from pathlib import Path

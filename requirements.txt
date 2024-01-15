@@ -5,3 +5,4 @@ gtts
 pdfminer.six
 gunicorn
 psycopg2-binary
+pandas
