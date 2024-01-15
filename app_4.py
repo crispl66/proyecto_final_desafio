@@ -1,10 +1,11 @@
-from flask import Flask, jsonify, render_template, request
+from flask import Flask, jsonify, render_template, request, send_file
 from gtts import gTTS
 import requests
 import os 
 from pymongo import MongoClient 
 from pdfminer.high_level import extract_text 
 from gridfs import GridFS
+from bson import ObjectId
 
 app = Flask(__name__)
 
@@ -56,14 +57,33 @@ def subir_pdf():
     # Open the local audio file in binary mode ('rb')
     with open(local_audio_file, 'rb') as audio_file:
         # Save the binary content to GridFS
-        file_id = fs_audio.put(audio_file, filename='audio.mp3', metadata={'folder': 'audios'})
+        audio_file_id = fs_audio.put(audio_file, filename='audio.mp3', metadata={'folder': 'audios'})
 
     with open(local_pdf_file, 'rb') as pdf_file:
         # Save the binary content to GridFS
-        file_id = fs_pdf.put(pdf_file, filename='acta.pdf', metadata={'folder': 'pdfs'})
+        pdf_file_id = fs_pdf.put(pdf_file, filename='acta.pdf', metadata={'folder': 'pdfs'})
     #audios_collection.insert_one({'audio': audio_binario})
 
-    return
+    return jsonify({
+        'pdf_id': str(pdf_file_id),
+        'audio_id': str(audio_file_id),
+        'resumen': texto,
+    })
+
+@app.route('/get_pdf/<pdf_id>', methods=['GET'])
+def get_pdf(pdf_id):
+    fs_pdf = GridFS(db, collection='pdfs')
+    pdf_file = fs_pdf.get(ObjectId(pdf_id))
+    return send_file(pdf_file, as_attachment=True)
+
+
+@app.route('/get_audio/<audio_id>', methods=['GET'])
+def get_audio(audio_id):
+    fs_audio = GridFS(db, collection='audios')
+    audio_file = fs_audio.get(ObjectId(audio_id))
+    return send_file(audio_file, mimetype='audio/mpeg', as_attachment=True)
+
+
 
 @app.route('/resumen', methods=['GET','POST'])
 def resumen():
