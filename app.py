@@ -1,47 +1,103 @@
-import os
-import shutil
-#import cv2
-import json
-import pandas as pd
-import logging
-from flask import Flask, jsonify, request, flash, redirect, Response
-from pathlib import Path
-
-
+from flask import Flask, jsonify, render_template, request
+from gtts import gTTS
+import requests
+import os 
+from pymongo import MongoClient 
+from pdfminer.high_level import extract_text 
 
 app = Flask(__name__)
 
-try:
-    path = os.path.dirname(os.path.abspath(__file__))
-    upload_folder=os.path.join(
-    path.replace("/file_folder",""),"tmp")
-    os.makedirs(upload_folder, exist_ok=True)
-    app.config['upload_folder'] = upload_folder
-except Exception as e:
-    app.logger.info('An error occurred while creating temp folder')
-    app.logger.error('Exception occurred : {}'.format(e))
-@app.route('/')
-def index():
-    return Response(json.dumps({
-    'status': True,
-    'code': 200,
-    'message': 'Its Working!'}), mimetype='application/json')
-@app.route('/pass')
-def post():
-    try:
-        pdf_file = request.files['file']
-        pdf_name = pdf_file.filename
-        save_path = os.path.join(
-        app.config.get('upload_folder'),pdf_name)
-        pdf_file.save(save_path)
-        # getting file size
-        file=Path(save_path).stat().st_size
-        shutil.rmtree(upload_folder)
-        final_data = pd.DataFrame(
-        {'pdf':pdf_name,'size':"{} bytes".format(file)})
-        return final_data.to_json(orient="records")
-    except Exception as e:
-        app.logger.info('error occurred')
+#conexiones con BBDD
+mongo_url ='mongodb+srv://falberola:5zZi7xSEYPPIdGgc@cluster0.hd9lmf3.mongodb.net/datadmin_fincas'
+client = MongoClient(mongo_url)
+db = client.get_database('datadmin_fincas')
+resumen_collection = db['resumen'] 
+audios_collection = db['audios'] 
+
+@app.route('/', methods=['GET'])
+def plantilla():
+    return render_template('endpoints.html')
+
+@app.route('/subir_pdf', methods=['POST'])
+def subir_pdf():
+    text = extract_text('./Acta comunidad.pdf')
+    local_pdf_file = './Acta comunidad.pdf'
+    #raw = parser.from_file('./texto1.pdf')
+
+    API_TOKEN = "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"
+
+    API_URL = "https://api-inference.huggingface.co/models/facebook/bart-large-cnn"
+    headers = {"Authorization": f"Bearer {API_TOKEN}"}
+
+    def query(payload):
+        response = requests.post(API_URL, headers=headers, json=payload)
+        return response.json()
+        
+    resumen = query({"inputs":text})
+
+    contenido_resumen = resumen[0][next(iter(resumen[0]))]
+
+    texto = contenido_resumen
+
+    tts = gTTS(text=texto, lang='es')
+
+    tts.save("audio.mp3")
+
+
+    resumen_collection.insert_one({'resumen': texto})
+
+    local_audio_file = './audio.mp3'
+
+    # Connect to the GridFS collection
+    fs_pdf = GridFS(db, collection='pdfs')
+    fs_audio = GridFS(db, collection='audios')
+
+    # Open the local audio file in binary mode ('rb')
+    with open(local_audio_file, 'rb') as audio_file:
+        # Save the binary content to GridFS
+        file_id = fs_audio.put(audio_file, filename='audio.mp3', metadata={'folder': 'audios'})
+
+    with open(local_pdf_file, 'rb') as pdf_file:
+        # Save the binary content to GridFS
+        file_id = fs_pdf.put(pdf_file, filename='acta.pdf', metadata={'folder': 'pdfs'})
+    #audios_collection.insert_one({'audio': audio_binario})
+    
+    return
+
+@app.route('/resumen', methods=['GET','POST'])
+def resumen():
+    #if 'file' not in request.files:
+    #    return "No se proporcionó ningún archivo"
+    #file = request.files['file']
+    #file_content = request.args.get('file_content')
+
+    file_path = os.path.join("temp", "uploaded_file.pdf")
+
+    file = request.files['file']
+
+    if not os.path.exists(file_path):
+        return "No se encontró el archivo", 400
+    if not file:
+        return "No se proporcionó ningún archivo en el parámetro 'file'", 400
+
+    text = extract_text(file_path)
+    
+    API_TOKEN = "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"
+    API_URL = "https://api-inference.huggingface.co/models/facebook/bart-large-cnn"
+    headers = {"Authorization": f"Bearer {API_TOKEN}"}
+
+    def query(payload):
+        response = requests.post(API_URL, headers=headers, json=payload)
+        return response.json()
+
+    resumen = query({"inputs": text})
+    contenido_resumen = resumen[0][next(iter(resumen[0]))]
+    resumen_collection.insert_one({'resumen': contenido_resumen})
+    tts = gTTS(text=contenido_resumen, lang='es')
+    audio = tts.save("audio.mp3")
+    audios_collection.insert_one({'audio': audio})
+    
+    return jsonify({'resumen': contenido_resumen, 'audio': audio})
 
 if __name__ == '__main__':
     app.run(debug=True,port=8000)
