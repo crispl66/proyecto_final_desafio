@@ -28,17 +28,17 @@ def index():
     'message': 'Its Working!'}), mimetype='application/json')
 @app.route('/pass', methods=['POST'])
 def post():
-try:
-    pdf_file = request.files['file']
-    pdf_name = pdf_file.filename
-    save_path = os.path.join(
-    app.config.get('upload_folder'),pdf_name)
-    pdf_file.save(save_path)
-    # getting file size
-    file=Path(save_path).stat().st_size
-    shutil.rmtree(upload_folder)
-    final_data = pd.DataFrame(
-    {'pdf':pdf_name,'size':"{} bytes".format(file)})
-    return final_data.to_json(orient="records")
-except Exception as e:
-    app.logger.info("error occurred")
+    try:
+        pdf_file = request.files['file']
+        pdf_name = pdf_file.filename
+        save_path = os.path.join(
+        app.config.get('upload_folder'),pdf_name)
+        pdf_file.save(save_path)
+        # getting file size
+        file=Path(save_path).stat().st_size
+        shutil.rmtree(upload_folder)
+        final_data = pd.DataFrame(
+        {'pdf':pdf_name,'size':"{} bytes".format(file)})
+        return final_data.to_json(orient="records")
+    except Exception as e:
+        app.logger.info('error occurred')
