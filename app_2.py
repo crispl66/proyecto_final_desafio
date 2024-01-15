@@ -1,9 +1,10 @@
-from flask import Flask, jsonify, render_template, request
+from flask import Flask, jsonify, render_template, request, Response
 from gtts import gTTS
 import requests
 import os 
 from pymongo import MongoClient 
-from pdfminer.high_level import extract_text 
+from pdfminer.high_level import extract_text
+import json
 
 app = Flask(__name__)
 
@@ -47,11 +48,28 @@ def resumen():
     #file = request.files['file']
     #file_content = request.args.get('file_content')
 
+    try:
+        path = os.path.dirname(os.path.abspath(__file__))
+        upload_folder=os.path.join(
+        path.replace("/file_folder",""),"tmp")
+        os.makedirs(upload_folder, exist_ok=True)
+        app.config['upload_folder'] = upload_folder
+    except Exception as e:
+        app.logger.info('An error occurred while creating temp folder')
+        app.logger.error('Exception occurred : {}'.format(e))
+
+@app.route('/')
+def index():
+    return Response(json.dumps({
+    'status': True,
+    'code': 200,
+    'message': 'Its Working!'}), mimetype='application/json')
+
     file_path = os.path.join("temp", "uploaded_file.pdf")
 
     if not os.path.exists(file_path):
         return "No se encontró el archivo", 400
-    if not file:
+    if not 'file':
         return "No se proporcionó ningún archivo en el parámetro 'file'", 400
 
     text = extract_text(file_path)
