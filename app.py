@@ -5,6 +5,7 @@ import os
 from pymongo import MongoClient 
 from pdfminer.high_level import extract_text 
 from gridfs import GridFS
+from bson import send_file, ObjectId
 
 app = Flask(__name__)
 
@@ -68,6 +69,21 @@ def subir_pdf():
         'audio_id': str(audio_file_id),
         'resumen': texto,
     })
+
+@app.route('/get_pdf/<pdf_id>', methods=['GET'])
+def get_pdf(pdf_id):
+    fs_pdf = GridFS(db, collection='pdfs')
+    pdf_file = fs_pdf.get(ObjectId(pdf_id))
+    return send_file(pdf_file, as_attachment=True)
+
+
+@app.route('/get_audio/<audio_id>', methods=['GET'])
+def get_audio(audio_id):
+    fs_audio = GridFS(db, collection='audios')
+    audio_file = fs_audio.get(ObjectId(audio_id))
+    return send_file(audio_file, as_attachment=True)
+
+
 
 @app.route('/resumen', methods=['GET','POST'])
 def resumen():
