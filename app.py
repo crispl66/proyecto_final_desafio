@@ -56,14 +56,18 @@ def subir_pdf():
     # Open the local audio file in binary mode ('rb')
     with open(local_audio_file, 'rb') as audio_file:
         # Save the binary content to GridFS
-        file_id = fs_audio.put(audio_file, filename='audio.mp3', metadata={'folder': 'audios'})
+        audio_file_id = fs_audio.put(audio_file, filename='audio.mp3', metadata={'folder': 'audios'})
 
     with open(local_pdf_file, 'rb') as pdf_file:
         # Save the binary content to GridFS
-        file_id = fs_pdf.put(pdf_file, filename='acta.pdf', metadata={'folder': 'pdfs'})
+        pdf_file_id = fs_pdf.put(pdf_file, filename='acta.pdf', metadata={'folder': 'pdfs'})
     #audios_collection.insert_one({'audio': audio_binario})
 
-    return
+    return jsonify({
+        'pdf_id': str(pdf_file_id),
+        'audio_id': str(audio_file_id),
+        'resumen': texto,
+    })
 
 @app.route('/resumen', methods=['GET','POST'])
 def resumen():
