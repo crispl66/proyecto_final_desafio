@@ -62,7 +62,7 @@ def prueba():
 
 
     return jsonify({'message': f'Archivo de audio "{file_name}" generado y guardado correctamente'}) 
-
+'''
 @app.route('/resumen', methods=['GET','POST'])
 def resumen():
     text = extract_text('./Acta comunidad.pdf')
@@ -153,6 +153,6 @@ def audio():
     #audios_collection.insert_one({'audio': audio_binario})
 
     return send_file(local_audio_file, mimetype='audio/mp3', as_attachment=True)
-
+'''
 if __name__ == '__main__':
     app.run(debug=True,port=8000)
