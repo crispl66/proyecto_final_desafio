@@ -49,13 +49,17 @@ def prueba():
 
     resumen_collection.insert_one({'resumen': contenido_resumen})
 
+    local_audio_file = './audio.mp3'
+
     # Connect to the GridFS collection
     fs_pdf = GridFS(db, collection='pdfs')
     fs_audio = GridFS(db, collection='audios')
 
-    # Save the binary content to GridFS
-    audio_file_id = fs_audio.put(tts, filename=f"{file_name}_audio.mp3", metadata={'folder': 'audios'})
+    with open(local_audio_file, 'rb') as audio_file:
+        # Save the binary content to GridFS
+        audio_file_id = fs_audio.put(audio_file, filename=f"{file_name}.mp3", metadata={'folder': 'audios'})
     pdf_file_id = fs_pdf.put(file, filename=file_name, metadata={'folder': 'pdfs'})
+
 
     return jsonify({'message': f'Archivo de audio "{file_name}" generado y guardado correctamente'}) 
 
