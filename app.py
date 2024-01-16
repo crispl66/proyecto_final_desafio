@@ -25,6 +25,7 @@ def prueba():
     if 'file' not in request.files:
         return "No se proporcionó ningún archivo"
     file = request.files['file']
+    file_name = file.filename
 
     reader = PdfReader(file)
     text = ""
@@ -40,11 +41,23 @@ def prueba():
         return response.json()
 
     resumen = query({"inputs": text})
-    contenido_resumen = resumen[0][next(iter(resumen[0]))]      
+    contenido_resumen = resumen[0][next(iter(resumen[0]))]   
+
+    texto = contenido_resumen
+    tts = gTTS(text=texto, lang='es')
+    tts.save("audio.mp3")   
 
     resumen_collection.insert_one({'resumen': contenido_resumen})
-    
-    return jsonify({'resumen': contenido_resumen}) 
+
+    # Connect to the GridFS collection
+    fs_pdf = GridFS(db, collection='pdfs')
+    fs_audio = GridFS(db, collection='audios')
+
+    # Save the binary content to GridFS
+    audio_file_id = fs_audio.put(tts, filename=f"{file_name}_audio.mp3", metadata={'folder': 'audios'})
+    pdf_file_id = fs_pdf.put(file, filename=file_name, metadata={'folder': 'pdfs'})
+
+    return jsonify({'message': f'Archivo de audio "{file_name}" generado y guardado correctamente'}) 
 
 @app.route('/resumen', methods=['GET','POST'])
 def resumen():
