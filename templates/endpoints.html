@@ -51,10 +51,10 @@
         <div class="endpoint-details">
             <p><strong>Endpoint:</strong> /subir_pdf</p>
             <p><strong>Descripción:</strong>Este endpoint obtiene el pdf del acta de reunión</p>
-            <p><strong>Ruta:</strong> https://aws.../subir_pdf</p>
+            <p><strong>Ruta:</strong> https://16.170.236.176/subir_pdf</p>
             <p><strong>Método:</strong> POST</p>
-            <p><strong>Ejemplo input:</strong> data = {"message":"Sube el acta de reunión en formato pdf"}</p>
-            <p><strong>Respuesta ejemplo:</strong> {"message":"Archivo subido correctamente"}</p>
+            <p><strong>Formato respuesta:</strong>json</p>
+            <p><strong>Respuesta ejemplo:</strong> {"message":string}</p>
         </div>
     </div>
 
@@ -64,8 +64,9 @@
         <div class="endpoint-details">
             <p><strong>Endpoint:</strong> /resumen</p>
             <p><strong>Descripción:</strong>Por medio de una llamada a api externa, obtenemos un resumen del texto del pdf subido.</p>
-            <p><strong>Ruta:</strong> https://aws.../resumen</p>
+            <p><strong>Ruta:</strong> https://16.170.236.176/resumen</p>
             <p><strong>Método:</strong> GET</p>
+            <p><strong>Formato respuesta:</strong> json</p>
             <p><strong>Respuesta ejemplo:</strong> Texto del resumen del acta</p>
             <!-- <p><strong>Ejemplo input:</strong> Mandad una imagen</p> -->
         </div>
@@ -78,8 +79,9 @@
         <div class="endpoint-details">
             <p><strong>Endpoint:</strong> /audio</p>
             <p><strong>Descripción:</strong> Por medio de una llamada a api externa, obtenemos un audio en formato .mp3 del resumen</p>
-            <p><strong>Ruta:</strong> https://aws.../audio</p>
+            <p><strong>Ruta:</strong> https://16.170.236.176/audio</p>
             <p><strong>Método:</strong> GET</p>
+            <p><strong>Formato respuesta:</strong> Audio mp3</p>
             <p><strong>Respuesta ejemplo:</strong> Audio del resumen del acta</p>
             <!-- <p><strong>Ejemplo input:</strong> Example for Endpoint 2</p> -->
         </div>
