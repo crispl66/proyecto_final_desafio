@@ -15,7 +15,7 @@ client = MongoClient(mongo_url)
 db = client.get_database('datadmin_fincas')
 resumen_collection = db['resumen'] 
 audios_collection = db['audios'] 
-
+'''
 @app.route('/', methods=['GET'])
 def plantilla():
     return render_template('endpoints.html')
@@ -73,7 +73,7 @@ def resumen():
         print("No se ha encontrado ningún resumen en la base de datos")
 
     return jsonify({'resumen': resumen_texto})
-
+'''
 @app.route('/audio', methods=['GET','POST'])
 def audio():
     try:
