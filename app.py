@@ -65,15 +65,22 @@ def prueba():
 
 @app.route('/resumen', methods=['GET','POST'])
 def resumen():
-    document = resumen_collection.find_one()
+    try:
+        document = resumen_collection.find_one()
 
-    if document:
-        resumen_texto = document.get('resumen')
-        print(resumen_text)
-    else:
-        print("No se ha encontrado ningún resumen en la base de datos")
+        if document:
+            resumen_texto = document.get('resumen')
+        else:
+            print("No se ha encontrado ningún resumen en la base de datos")
 
-    return jsonify({'resumen': document})
+        return jsonify({'resumen': resumen_texto})
+
+    except Exception as e:
+        # Log the exception for debugging
+        print(f"Error: {str(e)}")
+        error_response = jsonify(error=str(e))
+        error_response.status_code = 500
+        return error_response
 '''
 @app.route('/audio', methods=['GET','POST'])
 def audio():
