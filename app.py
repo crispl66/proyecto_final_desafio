@@ -65,67 +65,34 @@ def prueba():
 
 @app.route('/resumen', methods=['GET','POST'])
 def resumen():
-    try:
-        document = resumen_collection.find_one()
+    document = resumen_collection.find_one()
 
-        if document:
-            resumen_texto = document.get('resumen')
-        else:
-            print("No se ha encontrado ningún resumen en la base de datos")
+    if document:
+        resumen_texto = document.get('resumen')
+    else:
+        print("No se ha encontrado ningún resumen en la base de datos")
 
-        return jsonify({'resumen': resumen_texto})
+    return jsonify({'resumen': resumen_texto})
 
-    except Exception as e:
-        # Log the exception for debugging
-        print(f"Error: {str(e)}")
-        error_response = jsonify(error=str(e))
-        error_response.status_code = 500
-        return error_response
-'''
 @app.route('/audio', methods=['GET','POST'])
 def audio():
-    text = extract_text('./Acta comunidad.pdf')
-    local_pdf_file = './Acta comunidad.pdf'
-    #raw = parser.from_file('./texto1.pdf')
-
-    API_TOKEN = "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"
-
-    API_URL = "https://api-inference.huggingface.co/models/facebook/bart-large-cnn"
-    headers = {"Authorization": f"Bearer {API_TOKEN}"}
-
-    def query(payload):
-        response = requests.post(API_URL, headers=headers, json=payload)
-        return response.json()
-        
-    resumen = query({"inputs":text})
-
-    contenido_resumen = resumen[0][next(iter(resumen[0]))]
-
-    texto = contenido_resumen
-
-    tts = gTTS(text=texto, lang='es')
-
-    tts.save("audio.mp3")
-
-
-    resumen_collection.insert_one({'resumen': texto})
-
-    local_audio_file = './audio.mp3'
-
-    # Connect to the GridFS collection
     fs_audio = GridFS(db, collection='audios')
 
-    # Open the local audio file in binary mode ('rb')
-    with open(local_audio_file, 'rb') as audio_file:
-        # Save the binary content to GridFS
-        audio_file_id = fs_audio.put(audio_file, filename='audio.mp3', metadata={'folder': 'audios'})
+    # Assuming there's only one audio file, retrieve it
+    audio_file = fs_audio.find_one()
 
-    with open(local_pdf_file, 'rb') as pdf_file:
-        # Save the binary content to GridFS
-        pdf_file_id = fs_pdf.put(pdf_file, filename='acta.pdf', metadata={'folder': 'pdfs'})
-    #audios_collection.insert_one({'audio': audio_binario})
+    if audio_file:
+        # Set the appropriate response headers
+        response_headers = {
+            'Content-Type': 'audio/mp3',
+            'Content-Disposition': f'attachment; filename={audio_file.filename}'
+        }
 
-    return send_file(local_audio_file, mimetype='audio/mp3', as_attachment=True)
-'''
+        # Return the audio file as a response
+        return send_file(audio_file, as_attachment=True, download_name=audio_file.filename, mimetype='audio/mp3')
+
+    else:
+        return "No audio files found in the collection."
+
 if __name__ == '__main__':
     app.run(debug=True,port=8000)
