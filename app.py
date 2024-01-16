@@ -73,7 +73,7 @@ def resumen():
     else:
         print("No se ha encontrado ningún resumen en la base de datos")
 
-    return jsonify({'resumen': resumen_texto})
+    return jsonify({'resumen': document})
 '''
 @app.route('/audio', methods=['GET','POST'])
 def audio():
