@@ -6,3 +6,4 @@ pdfminer.six
 gunicorn
 psycopg2-binary
 pandas
+Flask-CORS

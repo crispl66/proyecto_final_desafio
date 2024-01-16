@@ -6,8 +6,11 @@ from pymongo import MongoClient
 from pdfminer.high_level import extract_text 
 from gridfs import GridFS
 from PyPDF2 import PdfReader
+from flask_cors import CORS
 
 app = Flask(__name__)
+
+CORS(app)
 
 #conexiones con BBDD
 mongo_url ='mongodb+srv://falberola:5zZi7xSEYPPIdGgc@cluster0.hd9lmf3.mongodb.net/datadmin_fincas'
@@ -19,7 +22,7 @@ audios_collection = db['audios']
 @app.route('/', methods=['GET'])
 def plantilla():
     return render_template('endpoints.html')
-'''
+
 @app.route('/subir_pdf', methods=['POST'])
 def prueba():
     if 'file' not in request.files:
@@ -61,7 +64,7 @@ def prueba():
     pdf_file_id = fs_pdf.put(file, filename=file_name, metadata={'folder': 'pdfs'})
 
 
-    return jsonify({'message': f'Archivo de audio "{file_name}" generado y guardado correctamente'}) 
+    return jsonify({'message': f'Archivo de audio "{file_name}" generado y guardado correctamente'}), 201
 
 @app.route('/resumen', methods=['GET','POST'])
 def resumen():
@@ -73,34 +76,26 @@ def resumen():
         print("No se ha encontrado ningún resumen en la base de datos")
 
     return jsonify({'resumen': resumen_texto})
-'''
+
 @app.route('/audio', methods=['GET','POST'])
 def audio():
-    try:
-        fs_audio = GridFS(db, collection='audios')
+    fs_audio = GridFS(db, collection='audios')
 
-        # Assuming there's only one audio file, retrieve it
-        audio_file = fs_audio.find_one()
+    # Assuming there's only one audio file, retrieve it
+    audio_file = fs_audio.find_one()
 
-        if audio_file:
-            # Set the appropriate response headers
-            response_headers = {
-                'Content-Type': 'audio/mp3',
-                'Content-Disposition': f'attachment; filename={audio_file.filename}'
-            }
+    if audio_file:
+        # Set the appropriate response headers
+        response_headers = {
+            'Content-Type': 'audio/mp3',
+            'Content-Disposition': f'attachment; filename={audio_file.filename}'
+        }
 
-            # Return the audio file as a response
-            return send_file(audio_file, as_attachment=True, download_name=audio_file.filename, mimetype='audio/mp3')
+        # Return the audio file as a response
+        return send_file(audio_file, as_attachment=True, download_name=audio_file.filename, mimetype='audio/mp3')
 
-        else:
-            return "No audio files found in the collection."
-    
-    except Exception as e:
-        # Log the exception for debugging
-        print(f"Error: {str(e)}")
-        error_response = jsonify(error=str(e))
-        error_response.status_code = 500
-        return error_response
+    else:
+        return "No audio files found in the collection."
 
 if __name__ == '__main__':
     app.run(debug=True,port=8000)
