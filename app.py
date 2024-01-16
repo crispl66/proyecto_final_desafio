@@ -76,23 +76,31 @@ def resumen():
 
 @app.route('/audio', methods=['GET','POST'])
 def audio():
-    fs_audio = GridFS(db, collection='audios')
+    try:
+        fs_audio = GridFS(db, collection='audios')
 
-    # Assuming there's only one audio file, retrieve it
-    audio_file = fs_audio.find_one()
+        # Assuming there's only one audio file, retrieve it
+        audio_file = fs_audio.find_one()
 
-    if audio_file:
-        # Set the appropriate response headers
-        response_headers = {
-            'Content-Type': 'audio/mp3',
-            'Content-Disposition': f'attachment; filename={audio_file.filename}'
-        }
+        if audio_file:
+            # Set the appropriate response headers
+            response_headers = {
+                'Content-Type': 'audio/mp3',
+                'Content-Disposition': f'attachment; filename={audio_file.filename}'
+            }it
 
-        # Return the audio file as a response
-        return send_file(audio_file, as_attachment=True, download_name=audio_file.filename, mimetype='audio/mp3')
+            # Return the audio file as a response
+            return send_file(audio_file, as_attachment=True, download_name=audio_file.filename, mimetype='audio/mp3')
 
-    else:
-        return "No audio files found in the collection."
+        else:
+            return "No audio files found in the collection."
+    
+    except Exception as e:
+        # Log the exception for debugging
+        print(f"Error: {str(e)}")
+        error_response = jsonify(error=str(e))
+        error_response.status_code = 500
+        return error_response
 
-if __name__ == '__main__':
+if __name__ == '__main__'
     app.run(debug=True,port=8000)
