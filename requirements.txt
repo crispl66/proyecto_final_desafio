@@ -5,5 +5,5 @@ gtts
 pdfminer.six
 gunicorn
 psycopg2-binary
-pandas
+PyPDF2
 Flask-CORS

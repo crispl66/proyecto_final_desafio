@@ -64,7 +64,7 @@ def prueba():
     pdf_file_id = fs_pdf.put(file, filename=file_name, metadata={'folder': 'pdfs'})
 
 
-    return jsonify({'message': f'Archivo de audio "{file_name}" y resumen generados y guardados correctamente'}), 201
+    return jsonify({'message': f'Archivo de audio "{file_name}" generado y guardado correctamente'}), 201
 
 @app.route('/resumen', methods=['GET','POST'])
 def resumen():
@@ -73,7 +73,7 @@ def resumen():
     if document:
         resumen_texto = document.get('resumen')
     else:
-        return "No se ha encontrado ningún resumen en la base de datos"
+        print("No se ha encontrado ningún resumen en la base de datos")
 
     return jsonify({'resumen': resumen_texto})
 
@@ -95,7 +95,7 @@ def audio():
         return send_file(audio_file, as_attachment=True, download_name=audio_file.filename, mimetype='audio/mp3')
 
     else:
-        return "No se ha encontrado ningún audio en la base de datos"
+        return "No audio files found in the collection."
 
 if __name__ == '__main__':
     app.run(debug=True,port=8000)
